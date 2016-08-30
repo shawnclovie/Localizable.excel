@@ -21,8 +21,10 @@ Each work sheet is a Localizabe.strings group:
 		home.footer   Copyright
 
 ## Install python library
-The tool would use pyExcelerator and pycurl, download and unpackage to install.
-TODO:
+The tool would use pyExcelerator and pycurl, download and install them please.
+
+	https://sourceforge.net/projects/pyexcelerator/
+	http://pycurl.io/
 
 ## Translate
 You should register on Bing Translation, save client ID and client secret into azure_client.json:
@@ -44,4 +46,5 @@ All strings defined work sheet would be export, with difference language sub dir
 	...
 
 ## Tips
-Currently the tool cannot save style on excel but font name, you can change it on head of Excel.py.
+* Currently the tool cannot save style on excel but font name, you can change it on head of Excel.py.
+* After translate and export, the excel and strings would be overwrite, any changes in strings and style in excel would lost.
