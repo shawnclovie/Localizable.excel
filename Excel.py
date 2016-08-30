@@ -4,7 +4,7 @@ import pyExcelerator
 import os, sys
 
 style = pyExcelerator.XFStyle()
-style.font.name = "Inconsolata"
+style.font.name = "Consolas"
 
 
 # Multiple language Localizable.strings

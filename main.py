@@ -10,13 +10,13 @@ if __name__ == '__main__':
 
 args = sys.argv[1:]
 if len(args) < 2:
-	print "usage: " + sys.argv[0] + " <to_excel|export|translate> project_directory [strings_file_name] [base_language_name]"
+	print "usage: " + sys.argv[0] + " <to_excel|export|translate> project_directory [strings_file_name]"
 	exit()
 
 action = args[0]
 projDir = args[1]
+
 filename = len(args) < 3 and "Localizable" or args[2]
-baseLanguage = len(args) < 4 and "Base" or args[3]
 if not os.path.isdir(projDir):
 	print projDir + " is not a directory."
 	exit()
