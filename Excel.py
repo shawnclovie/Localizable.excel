@@ -9,15 +9,15 @@ style.font.name = "Consolas"
 
 # Multiple language Localizable.strings
 class Document:
-	# {language_name:{key:text, ...}, ...}
-	__language_strings = {}
-	language_names = []
-	key_names = []
 
 	def __init__(self, name, path, file):
 		self.name = name
 		self.path = path
 		self.file = file
+		# {language_name:{key:text, ...}, ...}
+		self.__language_strings = {}
+		self.language_names = []
+		self.key_names = []
 
 	def non_text_keys_for_language(self, language):
 		if not self.__language_strings.has_key(language):
@@ -30,6 +30,9 @@ class Document:
 			if not strings.has_key(key):
 				keys.append(key)
 		return keys
+
+	def strings_for_language(self, language):
+		return self.__language_strings[language]
 
 	def string_for_key_and_language(self, key, language):
 		if not self.__language_strings.has_key(language) or not self.__language_strings[language].has_key(key):
@@ -48,7 +51,7 @@ class Document:
 		if not self.__language_strings.has_key(language):
 			return False
 		strings = self.__language_strings[language]
-		# print len(strings.keys()) + " keys writing to " + path
+		print "writing document {0} ({1} keys) to\n{2}".format(self.name, len(self.key_names), path)
 		dir = os.path.dirname(path)
 		if not os.path.isdir(dir):
 			os.makedirs(dir)
@@ -76,10 +79,9 @@ class Document:
 
 
 class Sheets:
-	# [LocalizableDocument, ...]
-	documents = []
-
 	def __init__(self, excel_path):
+		# [LocalizableDocument, ...]
+		self.documents = []
 		self.excel_path = excel_path
 		if len(excel_path) > 0:
 			self.load_excel_with_path(excel_path)
@@ -114,6 +116,7 @@ class Sheets:
 				lang = language_names[col_index - 1]
 				key = language_keys[row_index - 1]
 				doc.set_string_with_key_for_language(v, key, lang)
+			print "loaded document '{0}' with {1} keys.".format(doc.name, len(doc.key_names))
 			self.documents.append(doc)
 
 	def save_excel(self, path = None):
