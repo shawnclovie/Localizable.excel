@@ -50,13 +50,14 @@ class Document:
 	def save_strings_for_language_at_path(self, language, path):
 		if not self.__language_strings.has_key(language):
 			return False
-		strings = self.__language_strings[language]
 		print "writing document {0} ({1} keys) to\n{2}".format(self.name, len(self.key_names), path)
 		dir = os.path.dirname(path)
 		if not os.path.isdir(dir):
 			os.makedirs(dir)
 		file = open(path, 'wb')
-		for (key, text) in strings.items():
+		strings = self.__language_strings[language]
+		for key in self.key_names:
+			text = strings[key]
 			line = '"' + key + '" = "' + text.replace('"', '\\"') + '";\n'
 			file.write(line.encode("utf-8"))
 		file.close()
