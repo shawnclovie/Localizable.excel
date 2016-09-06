@@ -57,9 +57,10 @@ class Document:
 		file = open(path, 'wb')
 		strings = self.__language_strings[language]
 		for key in self.key_names:
-			text = strings[key]
-			line = '"' + key + '" = "' + text.replace('"', '\\"') + '";\n'
-			file.write(line.encode("utf-8"))
+			if strings.has_key(key):
+				text = strings[key]
+				line = '"' + key + '" = "' + text.replace('"', '\\"') + '";\n'
+				file.write(line.encode("utf-8"))
 		file.close()
 		return True
 

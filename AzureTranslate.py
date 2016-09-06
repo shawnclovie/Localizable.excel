@@ -52,9 +52,11 @@ class Authorizer:
 			print "Please save Azure client information into " + client_info_file
 			print 'format: {"client_id":"Azure Application ID","client_secret":"Application "}'
 			exit()
-		params = json.load(client_info_file)
+		fp = open(client_info_file, 'r')
+		params = json.load(fp)
 		params["grant_type"] = "client_credentials"
 		params["scope"] = "http://api.microsofttranslator.com"
+		fp.close()
 		print "fetching access token..." + self.auth_url
 		req = CURLRequest(self.auth_url, "POST")
 		req.curl.setopt(pycurl.SSL_VERIFYPEER, False)
