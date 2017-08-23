@@ -59,8 +59,10 @@ class Document:
 		for key in self.key_names:
 			if strings.has_key(key):
 				text = strings[key]
-				line = '"' + key + '" = "' + text.replace('"', '\\"') + '";\n'
-				file.write(line.encode("utf-8"))
+			else:
+				text = ""
+			line = '"' + key + '" = "' + text.replace('"', '\\"') + '";\n'
+			file.write(line.encode("utf-8"))
 		file.close()
 		return True
 
@@ -111,7 +113,7 @@ class Sheets:
 			doc.key_names = language_keys
 
 			for row_index, col_index in cell_keys:
-				if row_index == 0 or col_index == 0:
+				if row_index == 0 or col_index == 0 or col_index > len(language_names):
 					continue
 				index = (row_index, col_index)
 				v = values[index]
