@@ -1,47 +1,16 @@
 # -*- coding:utf-8 -*-
 
 import os
-import pycurl
-import StringIO
-import httplib, urllib
 import json
+import requests
 from xml.sax.saxutils import escape
 try:
 	import xml.etree.cElementTree as ET
 except ImportError:
 	import xml.etree.ElementTree as ET
 
-
-class CURLRequest:
-	def __init__(self, url, method = "GET"):
-		self.buffer = StringIO.StringIO()
-		c = pycurl.Curl()
-		c.setopt(pycurl.URL, url)
-		c.setopt(pycurl.CUSTOMREQUEST, method)
-		c.setopt(pycurl.WRITEFUNCTION, self.buffer.write)
-		self.curl = c
-
-	def set_headers(self, headers):
-		self.curl.setopt(pycurl.HTTPHEADER, headers)
-		return self
-
-	def set_post_data(self, data):
-		if type(data) is dict:
-			data = urllib.urlencode(data)
-		self.curl.setopt(pycurl.POSTFIELDS, data)
-		return self
-
-	def perform(self, format = None):
-		self.curl.perform()
-		data = self.buffer.getvalue()
-		self.buffer.close()
-		if format == "json":
-			return json.loads(data)
-		return data
-
-
 class Authorizer:
-	auth_url = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13/"
+	auth_url = "https://api.cognitive.microsoft.com/sts/v1.0/issueToken"
 
 	def __init__(self):
 		self.access_token = ""
@@ -53,16 +22,14 @@ class Authorizer:
 			print 'format: {"client_id":"Azure Application ID","client_secret":"Application "}'
 			exit()
 		fp = open(client_info_file, 'r')
-		params = json.load(fp)
-		params["grant_type"] = "client_credentials"
-		params["scope"] = "http://api.microsofttranslator.com"
+		secret = json.load(fp)["client_secret"]
 		fp.close()
 		print "fetching access token..." + self.auth_url
-		req = CURLRequest(self.auth_url, "POST")
-		req.curl.setopt(pycurl.SSL_VERIFYPEER, False)
-		# req.curl.setopt(pycurl.VERBOSE, True)
-		data = req.set_post_data(params).perform(format="json")
-		self.access_token = data["access_token"]
+		key = "Ocp-Apim-Subscription-Key"
+		response = requests.post(self.auth_url, headers={key: secret})
+		response.raise_for_status()
+		self.access_token = response.content
+		print "access_token=" + self.access_token
 
 
 class Translator:
@@ -72,12 +39,12 @@ class Translator:
 		self.authorizer = authorizer
 
 	def request_body(self, texts, from_language, to_language):
-		body_header = "<TranslateArrayRequest><AppId /><From>" + from_language + "</From><Texts>"
-		body_footer = "</Texts><To>" + to_language + "</To></TranslateArrayRequest>"
+		body_header = u"<TranslateArrayRequest><AppId /><From>" + from_language + u"</From><Texts>"
+		body_footer = u"</Texts><To>" + to_language + u"</To></TranslateArrayRequest>"
 		body = []
 		for text in texts:
-			body.append('<string xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">' + escape(text) + '</string>')
-		return body_header + "".join(body) + body_footer
+			body.append(u'<string xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">' + escape(text) + u'</string>')
+		return body_header + u"".join(body) + body_footer
 
 	def translate(self, texts, from_language, to_language):
 		if len(self.authorizer.access_token) == 0:
@@ -85,15 +52,14 @@ class Translator:
 		post_data = self.request_body(texts, from_language, to_language)
 		print "translating {0} texts {1} -> {2}...".format(len(texts), from_language, to_language)
 		# print post_data
-		headers = [
-			"Authorization: Bearer " + self.authorizer.access_token,
-			"Content-Type: text/xml",
-		]
-		req = CURLRequest(self.translate_url, "POST")
-		req.curl.setopt(pycurl.SSL_VERIFYPEER, False)
-		req.set_headers(headers)
-		req.set_post_data(post_data)
-		data = req.perform()
+		headers = {
+			"Authorization": "Bearer " + self.authorizer.access_token,
+			"Content-Type": "text/xml",
+		}
+		response = requests.post(self.translate_url, headers=headers, data=post_data.encode("utf-8"))
+		response.raise_for_status()
+		data = response.content
+		# print data
 		root = ET.fromstring(data)
 		result = []
 		for item in root:
