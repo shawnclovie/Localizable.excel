@@ -48,3 +48,6 @@ All strings defined work sheet would be export, with difference language sub dir
 ## Tips
 * Currently the tool cannot save style on excel but font name, you can change it on head of Excel.py.
 * After translate and export, the excel and strings would be overwrite, any changes in strings and style in excel would lost.
+
+## License
+MIT
